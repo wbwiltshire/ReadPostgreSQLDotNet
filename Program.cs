@@ -7,9 +7,11 @@ using Npgsql;
 
 namespace ReadPostgreSQLDotNet
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        //Note: You must change the default language version to at least 7.1
+        //      Project->Properties->Build->Advanced Build Settings->Language Version
+        public static async Task Main(string[] args)
         {
             IConfiguration config;
             IConfigurationBuilder builder;
@@ -27,32 +29,29 @@ namespace ReadPostgreSQLDotNet
             connString = $"Host={settings.PostgreSQL.Host};Port={settings.PostgreSQL.Port};Username={settings.PostgreSQL.Username};" + 
                 $"Password={settings.PostgreSQL.PW};Database={settings.PostgreSQL.Database};SSL Mode={settings.PostgreSQL.SSLMode};Trust Server Certificate=true";
 
-            var t = new TaskFactory().StartNew(async() => {
-
-                try
+            try
+            {
+                if (await HostExists(settings.PostgreSQL.Host))
                 {
-                    if (await HostExists(settings.PostgreSQL.Host))
+                    using (conn = new NpgsqlConnection(connString))
                     {
-                        using (conn = new NpgsqlConnection(connString))
-                        {
-                            await conn.OpenAsync();
-                            await PrintResults(query, conn);
-                        };
-                    }
-                    else
-                        Console.WriteLine($"Host does not exist: {settings.PostgreSQL.Host}");
+                        await conn.OpenAsync();
+                        await PrintResults(query, conn);
+                    };
                 }
-                catch (Npgsql.NpgsqlException ex)
-                {
-                    Console.WriteLine($"Exception: {ex.Message}");
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"Exception: {e.Message}");
-                }
+                else
+                    Console.WriteLine($"Host does not exist: {settings.PostgreSQL.Host}");
+            }
+            catch (Npgsql.NpgsqlException ex)
+            {
+                Console.WriteLine($"Exception: {ex.Message}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Exception: {e.Message}");
+            }
 
-                Console.WriteLine("\nPress <enter> to end....");
-            });
+            Console.WriteLine("\nPress <enter> to end....");
 
             Console.ReadLine();
         }
