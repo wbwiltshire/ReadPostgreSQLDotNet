@@ -2,7 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Binder;
+//using Microsoft.Extensions.Configuration.Binder;
 using Npgsql;
 
 namespace ReadPostgreSQLDotNet
